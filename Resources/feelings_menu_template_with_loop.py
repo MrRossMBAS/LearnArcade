@@ -4,7 +4,7 @@
 #
 
 # Output a welcome message.
-print("Write a welcome message here.")
+print("Testing changes.")
 print("Add more of these to output more lines.")
 print("You can make fancy boxes with characters.")
 print()
