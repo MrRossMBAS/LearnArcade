@@ -1,0 +1,2 @@
+arcade
+pymunk==6.0.0
