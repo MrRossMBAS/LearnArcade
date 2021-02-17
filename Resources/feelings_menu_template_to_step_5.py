@@ -31,3 +31,10 @@ if feeling == "A":
     print()
     print("Janis Joplin")
     print()
+# Use
+# elif feeling == "B":
+# to add more feelings.
+# Use
+# else:
+# to catch errors.
+# Remember to space in the parts after the elif and the else.
