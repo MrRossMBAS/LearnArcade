@@ -40,7 +40,7 @@ while run_feelings:
     # Notice the space. It's important.
     feeling = input("Choose a feeling from the options (A, B, C, D) or Q to quit: ")
 
-    # Process the user input.
+    # Process the user input and respond.
     if feeling == "A":
         print()
         print("You can destroy your now, by worrying about tomorrow.")
