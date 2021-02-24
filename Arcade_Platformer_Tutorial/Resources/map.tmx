@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="25" height="20" tilewidth="64" tileheight="64" infinite="0" nextlayerid="3" nextobjectid="1">
- <tileset firstgid="1" name="my_tiles" tilewidth="64" tileheight="64" tilecount="2" columns="0">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="25" height="20" tilewidth="64" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="1">
+ <tileset firstgid="1" name="my_tiles" tilewidth="64" tileheight="64" tilecount="3" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image width="64" height="64" source="floor.png"/>
@@ -8,10 +8,18 @@
   <tile id="1">
    <image width="64" height="64" source="coin.png"/>
   </tile>
+  <tile id="2">
+   <image width="64" height="64" source="grass.png"/>
+  </tile>
  </tileset>
  <layer id="1" name="Platforms" width="25" height="20">
   <data encoding="base64" compression="zlib">
    eJxjYBgFo2AUjIJRMApIB4wU4lFAXQAAHvAAEQ==
+  </data>
+ </layer>
+ <layer id="3" name="Background" width="25" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMNwAMx6MTR5dbBQMPQAAVRwAKw==
   </data>
  </layer>
  <layer id="2" name="Coins" width="25" height="20">
