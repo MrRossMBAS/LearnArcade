@@ -20,7 +20,7 @@
  </tileset>
  <layer id="1" name="Platforms" width="25" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMApIB4wU4lFAXQAAHvAAEQ==
+   eJxjYBgFo2AUjIKRARjx4FFAOsAXnsTgUUBdAAAyvAAY
   </data>
  </layer>
  <layer id="3" name="Background" width="25" height="20">
@@ -30,7 +30,7 @@
  </layer>
  <layer id="4" name="Foreground" width="25" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMNwAMxEYn7pRMPQAAFqAAC4=
+   eJxjYBgFo2AUjIKBByx48CggHTATgfGpGwVDDwAAtKAASg==
   </data>
  </layer>
  <layer id="5" name="Don't Touch" width="25" height="20">
@@ -40,7 +40,7 @@
  </layer>
  <layer id="2" name="Coins" width="25" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMJIAE5Fio2BoAQAPCAAF
+   eJxjYBgFo2AUDAfAhIM9CkYBOsCWPkbTzNAHAB8AAAk=
   </data>
  </layer>
 </map>
