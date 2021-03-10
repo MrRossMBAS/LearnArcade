@@ -12,7 +12,7 @@ SCREEN_TITLE = "Platformer"
 CHARACTER_SCALING = 0.6
 TILE_SCALING = 0.5
 COIN_SCALING = 0.5
-SPRITE_PIXEL_SIZE = 128
+SPRITE_PIXEL_SIZE = 64
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
@@ -120,6 +120,7 @@ class MyGame(arcade.Window):
 
         # Calculate the right edge of the my_map in pixels
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
+        print( self.end_of_map, my_map.map_size.width, GRID_PIXEL_SIZE )
 
         # -- Background
         self.background_list = arcade.tilemap.process_layer(my_map,
