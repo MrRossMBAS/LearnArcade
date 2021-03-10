@@ -112,8 +112,8 @@ class MyGame(arcade.Window):
         dont_touch_layer_name = "Don't Touch"
 
         # Map name
-        # map_name = f":resources:tmx_maps/map2_level_{level}.tmx"
-        map_name = "Resources/map.tmx"
+        map_name = f"Resources/map_level_{level}.tmx"
+        print( map_name )
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)

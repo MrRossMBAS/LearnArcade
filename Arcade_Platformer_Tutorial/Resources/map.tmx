@@ -20,7 +20,7 @@
  </tileset>
  <layer id="1" name="Platforms" width="25" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMApIB4wU4lFAXQAAHvAAEQ==
+   eJxjYBgFo2AUjIJRMApIB4x0wKOAeAAAKjAAGg==
   </data>
  </layer>
  <layer id="3" name="Background" width="25" height="20">
