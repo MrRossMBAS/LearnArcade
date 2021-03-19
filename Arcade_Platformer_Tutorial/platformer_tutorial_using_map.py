@@ -89,7 +89,7 @@ class MyGame(arcade.Window):
 
         # Name of map file to load commented is from the example code.
         # map_name = ":resources:tmx_maps/map.tmx"
-        map_name = "Resources/map.tmx"
+        map_name = "Resources/map_level_1.tmx"
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         # Name of the layer that has items for pick-up
