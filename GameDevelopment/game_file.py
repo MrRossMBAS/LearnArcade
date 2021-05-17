@@ -163,12 +163,23 @@ class InstructionView(arcade.View):
                          arcade.color.WHITE, font_size=50, anchor_x="center")
         arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-75,
                          arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("F key to toggle full screen", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-150,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
         game_view = GameView()
         game_view.setup()
         self.window.show_view(game_view)
+
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
+
+        if key == arcade.key.F:
+            # User is toggling the full screen function.
+            # User hits f. Flip between full and not full screen.
+            self.window.set_fullscreen(not self.window.fullscreen)
+
 
 class GameOverView(arcade.View):
     """ View to show when game is over """
@@ -393,6 +404,14 @@ class GameView(arcade.View):
 
         self.process_keychange()
 
+        # Check for full screen toggling.
+        if key == arcade.key.F:
+            # User is toggling the full screen function.
+            # User hits f. Flip between full and not full screen.
+            self.window.set_fullscreen(not self.window.fullscreen)
+
+            self.change_viewport()
+
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
@@ -494,27 +513,30 @@ class GameView(arcade.View):
             changed_viewport = True
 
         if changed_viewport:
-            # Only scroll to integers. Otherwise we end up with pixels that
-            # don't line up on the screen
-            self.view_bottom = int(self.view_bottom)
-            self.view_left = int(self.view_left)
-
-            # Do the scrolling
-            arcade.set_viewport(self.view_left,
-                                SCREEN_WIDTH + self.view_left,
-                                self.view_bottom,
-                                SCREEN_HEIGHT + self.view_bottom)
+            self.change_viewport()
 
         # Check if the player died.
         if self.player_sprite.bottom < -100:
             view = GameOverView()
             self.window.show_view(view)
 
+    def change_viewport(self):
+        # Only scroll to integers. Otherwise we end up with pixels that
+        # don't line up on the screen
+        self.view_bottom = int(self.view_bottom)
+        self.view_left = int(self.view_left)
+
+        # Do the scrolling
+        arcade.set_viewport(self.view_left,
+                            SCREEN_WIDTH + self.view_left,
+                            self.view_bottom,
+                            SCREEN_HEIGHT + self.view_bottom)
+
 
 def main():
     """ Main method """
 
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,  fullscreen=True )
     start_view = InstructionView()
     window.show_view(start_view)
     arcade.run()
