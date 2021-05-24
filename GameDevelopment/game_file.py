@@ -210,6 +210,79 @@ class GameOverView(arcade.View):
         game_view.setup()
         self.window.show_view(game_view)
 
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
+
+        if key == arcade.key.F:
+            # User is toggling the full screen function.
+            # User hits f. Flip between full and not full screen.
+            self.window.set_fullscreen(not self.window.fullscreen)
+
+            # To resize the image we need to start the view again.
+            view = GameOverView()
+            self.window.show_view(view)
+
+
+class PauseView(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
+    def on_show(self):
+        arcade.set_background_color(arcade.color.ORANGE)
+
+    def on_draw(self):
+        arcade.start_render()
+
+        # Draw player, for effect, on pause screen.
+        # The previous View (GameView) was passed in
+        # and saved in self.game_view.
+        player_sprite = self.game_view.player_sprite
+        player_sprite.draw()
+
+        # draw an orange filter over him
+        arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
+                                          right=player_sprite.right,
+                                          top=player_sprite.top,
+                                          bottom=player_sprite.bottom,
+                                          color=arcade.color.ORANGE + (200,))
+
+        arcade.draw_text("PAUSED", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50,
+                         arcade.color.BLACK, font_size=50, anchor_x="center")
+
+        # Show tip to return or reset
+        arcade.draw_text("Press Esc. to return",
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+        arcade.draw_text("Press Enter to reset",
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2-30,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+        arcade.draw_text("Press F to toggle full screen",
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2-60,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.ESCAPE:   # resume game
+            self.window.show_view(self.game_view)
+            self.game_view.return_from_pause()
+        elif key == arcade.key.ENTER:  # reset game
+            game_view = GameView()
+            game_view.setup()
+            self.window.show_view(game_view)
+        elif key == arcade.key.F:
+            # User is toggling the full screen function.
+            # User hits f. Flip between full and not full screen.
+            self.window.set_fullscreen(not self.window.fullscreen)
+
 
 class GameView(arcade.View):
     """
@@ -257,6 +330,7 @@ class GameView(arcade.View):
         self.view_left = 0
 
         self.end_of_map = 0
+        self.map_background_color = None
 
         # Keep track of the score
         self.score = 0
@@ -336,13 +410,25 @@ class GameView(arcade.View):
         # --- Other stuff
         # Set the background color
         if my_map.background_color:
+            self.map_background_color = my_map.background_color
             arcade.set_background_color(my_map.background_color)
+        else:
+            # Have a default background color. Make it bright so we notice!
+            self.map_background_color = arcade.color.PINK
+            arcade.set_background_color(self.map_background_color)
 
         # Create the 'physics engine'
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
                                                              self.wall_list,
                                                              gravity_constant=GRAVITY,
                                                              ladders=self.ladder_list)
+
+    def return_from_pause(self):
+        """Reset anything we changed during the pause."""
+
+        # On the pause screen we change the background color. When we resume
+        #      we need to change it back.
+        arcade.set_background_color(self.map_background_color)
 
     def on_draw(self):
         """ Render the screen. """
@@ -421,6 +507,11 @@ class GameView(arcade.View):
             self.window.set_fullscreen(not self.window.fullscreen)
 
             self.change_viewport()
+
+        if key == arcade.key.ESCAPE:
+            # pass self, the current view, to preserve this view's state
+            pause = PauseView(self)
+            self.window.show_view(pause)
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -526,7 +617,7 @@ class GameView(arcade.View):
                     or bullet.right > self.view_left + SCREEN_WIDTH \
                     or bullet.left < self.view_left:
                 bullet.remove_from_sprite_lists()
-                print("A bullet left the view and is deleted.", bullet.bottom, self.view_bottom )
+                print("A bullet left the view and is deleted.", bullet.bottom, self.view_bottom)
 
             # If the bullet hits a platform, remove it.
             # Check this bullet to see if it hit a wall
@@ -619,7 +710,7 @@ class GameView(arcade.View):
 def main():
     """ Main method """
 
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,  fullscreen=True )
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,  fullscreen=True)
     start_view = InstructionView()
     window.show_view(start_view)
     arcade.run()
