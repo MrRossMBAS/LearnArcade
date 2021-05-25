@@ -86,6 +86,12 @@ SMOKE_RISE_RATE = 0.5
 # Chance we leave smoke trail
 SMOKE_CHANCE = 0.25
 
+# --- Bullet Management
+# The player can only shoot if there is available ammo.
+# The player can only shoot so many bullets at once.
+# Currently these are hard coded here, but they will be updatable later.
+AMMO = 4
+MAX_BULLETS = 4
 
 class Smoke(arcade.SpriteCircle):
     """ This represents a puff of smoke """
@@ -461,6 +467,7 @@ class GameView(arcade.View):
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
         self.game_over = arcade.load_sound(":resources:sounds/gameover1.wav")
         self.bullet_sound = arcade.load_sound(":resources:sounds/laser1.wav")
+        self.explosion_sound = arcade.load_sound(":resources:sounds/explosion1.wav")
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
@@ -689,6 +696,9 @@ class GameView(arcade.View):
         bullet.change_x = math.cos(angle) * BULLET_SPEED
         bullet.change_y = math.sin(angle) * BULLET_SPEED
 
+        # Play a bullet sound.
+        arcade.play_sound(self.bullet_sound)
+
         # Add the bullet to the appropriate lists
         self.bullet_list.append(bullet)
 
@@ -763,6 +773,18 @@ class GameView(arcade.View):
 
             # If it did, get rid of the bullet
             if len(hit_list) > 0:
+                # Make an explosion
+                for i in range(PARTICLE_COUNT):
+                    particle = Particle(self.explosions_list)
+                    particle.position = bullet.position
+                    self.explosions_list.append(particle)
+
+                smoke = Smoke(50)
+                smoke.position = bullet.position
+                self.explosions_list.append(smoke)
+
+                arcade.play_sound(self.explosion_sound)
+
                 bullet.remove_from_sprite_lists()
 
         # See if the moving wall hit a boundary and needs to reverse direction.
