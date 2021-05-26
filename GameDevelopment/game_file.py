@@ -34,7 +34,7 @@ BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 100
 
 PLAYER_START_X = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
-PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 1
+PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 5
 
 # Constants used to track if the player is facing left or right
 RIGHT_FACING = 0
@@ -92,6 +92,7 @@ SMOKE_CHANCE = 0.25
 # Currently these are hard coded here, but they will be updatable later.
 AMMO = 4
 MAX_BULLETS = 1
+
 
 class Smoke(arcade.SpriteCircle):
     """ This represents a puff of smoke """
@@ -300,7 +301,7 @@ class InstructionView(arcade.View):
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
         game_view = GameView()
-        game_view.setup()
+        game_view.setup(1)
         self.window.show_view(game_view)
 
     def on_key_press(self, key, modifiers):
@@ -315,9 +316,11 @@ class InstructionView(arcade.View):
 class GameOverView(arcade.View):
     """ View to show when game is over """
 
-    def __init__(self):
+    def __init__(self, death_message = "You died for no reason!"):
         """ This is run once when we switch to this view """
         super().__init__()
+
+        self.death_message = death_message
         self.texture = arcade.load_texture("game_over.png")
 
         # Reset the viewport, necessary if we have a scrolling game and we need
@@ -329,11 +332,17 @@ class GameOverView(arcade.View):
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
                                 SCREEN_WIDTH, SCREEN_HEIGHT)
+        arcade.draw_text(self.death_message,
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, re-start the game. """
         game_view = GameView()
-        game_view.setup()
+        game_view.setup(1)
         self.window.show_view(game_view)
 
     def on_key_press(self, key, modifiers):
@@ -402,7 +411,7 @@ class PauseView(arcade.View):
             self.game_view.return_from_pause()
         elif key == arcade.key.ENTER:  # reset game
             game_view = GameView()
-            game_view.setup()
+            game_view.setup(1)
             self.window.show_view(game_view)
         elif key == arcade.key.F:
             # User is toggling the full screen function.
@@ -462,6 +471,9 @@ class GameView(arcade.View):
         # Keep track of the score
         self.score = 0
 
+        # Keep track of the level.
+        self.level = 1
+
         # Load sounds
         self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
@@ -469,7 +481,7 @@ class GameView(arcade.View):
         self.bullet_sound = arcade.load_sound(":resources:sounds/laser1.wav")
         self.explosion_sound = arcade.load_sound(":resources:sounds/explosion1.wav")
 
-    def setup(self):
+    def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
 
         # Used to keep track of our scrolling
@@ -481,11 +493,14 @@ class GameView(arcade.View):
 
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
+        self.bullet_list = arcade.SpriteList()
+        self.explosions_list = arcade.SpriteList()
+
+        # Sprite lists loaded from maps.
         self.background_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
-        self.bullet_list = arcade.SpriteList()
-        self.explosions_list = arcade.SpriteList()
+        self.do_not_touch_list = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
         self.player_sprite = PlayerCharacter()
@@ -499,12 +514,14 @@ class GameView(arcade.View):
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         moving_platforms_layer_name = 'Moving Platforms'
+        do_not_touch_layer_name = "Don't Touch"
 
         # Name of the layer that has items for pick-up
         coins_layer_name = 'Coins'
 
         # Map name
-        map_name = f":resources:tmx_maps/map_with_ladders.tmx"
+        map_name = f":resources:tmx_maps/map2_level_{level}.tmx"
+        # map_name = f":resources:tmx_maps/map_with_ladders.tmx"
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
@@ -519,7 +536,9 @@ class GameView(arcade.View):
                                                       use_spatial_hash=True)
 
         # -- Moving Platforms
-        moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
+        moving_platforms_list = arcade.tilemap.process_layer(my_map,
+                                                             moving_platforms_layer_name,
+                                                             TILE_SCALING)
         for sprite in moving_platforms_list:
             self.wall_list.append(sprite)
 
@@ -533,6 +552,11 @@ class GameView(arcade.View):
 
         # -- Coins
         self.coin_list = arcade.tilemap.process_layer(my_map, coins_layer_name,
+                                                      TILE_SCALING,
+                                                      use_spatial_hash=True)
+
+        # -- Do not touch
+        self.do_not_touch_list = arcade.tilemap.process_layer(my_map, do_not_touch_layer_name,
                                                       TILE_SCALING,
                                                       use_spatial_hash=True)
 
@@ -573,6 +597,7 @@ class GameView(arcade.View):
         self.background_list.draw()
         self.ladder_list.draw()
         self.coin_list.draw()
+        self.do_not_touch_list.draw()
         self.player_list.draw()
         self.bullet_list.draw()
         self.explosions_list.draw()
@@ -666,7 +691,7 @@ class GameView(arcade.View):
 
         # The player can only shoot (we create a bullet)
         # if there is available ammo and the maximum number of bullets don't already exist.
-        if AMMO > 0 and len( self.bullet_list) < MAX_BULLETS:
+        if AMMO > 0 and len(self.bullet_list) < MAX_BULLETS:
             # Create a bullet
             bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING_LASER)
 
@@ -820,6 +845,15 @@ class GameView(arcade.View):
             coin.remove_from_sprite_lists()
             arcade.play_sound(self.collect_coin_sound)
 
+        # See if we hit any coins
+        do_not_touch_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                             self.do_not_touch_list)
+
+        if len(do_not_touch_hit_list) > 0:
+            # Player died.
+            view = GameOverView("You touched something you shouldn't.")
+            self.window.show_view(view)
+
         # Track if we need to change the viewport
         changed_viewport = False
 
@@ -853,8 +887,8 @@ class GameView(arcade.View):
             self.change_viewport()
 
         # Check if the player died.
-        if self.player_sprite.bottom < -100:
-            view = GameOverView()
+        if self.player_sprite.bottom < -1000:
+            view = GameOverView("You fell out of the world.")
             self.window.show_view(view)
 
     def change_viewport(self):
